@@ -7,9 +7,8 @@ namespace SharpEngine
     {
         static void Main(string[] args)
         {
-            using (var window = new NativeWindow(800, 600, "MyWindowTitle"))
-            {
-                // Main application loop
+            var window = new NativeWindow(800, 600, "MyWindowTitle");
+             // Main application loop
                 while (!window.IsClosing)
                 {
                     // OpenGL rendering
@@ -21,7 +20,9 @@ namespace SharpEngine
                     // Poll native operating system events (must be called or OS will think application is hanging)
                     Glfw.PollEvents();
                 }
-            }
+
+            window.Dispose();
+
         }
     }
 }
