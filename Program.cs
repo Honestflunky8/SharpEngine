@@ -11,6 +11,7 @@ namespace SharpEngine
     {
         private static int _width = 1024;
         private static int _height = 768;
+        public static bool toggle = false;
         
         //Creating 3 points for a triangle
         static float[] vertices = new float[]
@@ -38,21 +39,89 @@ namespace SharpEngine
             {
                 //This listens to events. Reacts to window changes like position etc.
                 Glfw.PollEvents();
+                if (Glfw.GetKey(window, Keys.Escape) == InputState.Press)
+                    Glfw.SetWindowShouldClose(window, true);
                 glClearColor(0.2f,.05f,.2f,.1f);
                 glClear(GL_COLOR_BUFFER_BIT);
                 glDrawArrays(GL_LINE_LOOP,0,3);
                 //GL_TRIANGLES for filled in triangle, GL_LINE_LOOP for outlined triangle
                 //Executes the commands now
                 glFlush();
+
+
                 
                 
-                vertices[4] += 0.001f;
                 UpdateTriangleBuffer();
 
 
 
             }
 
+        }
+        
+
+        
+
+        private static void MoveTriangleRight()
+        {
+            
+            //Move triangle right
+            vertices[0] += 0.00001f;
+            vertices[3] += 0.00001f;
+            vertices[6] += 0.00001f;
+        }
+        private static void MoveTriangleLeft()
+        {
+            //Move triangle right
+            vertices[0] -= 0.00001f;
+            vertices[3] -= 0.00001f;
+            vertices[6] -= 0.00001f;
+        }
+
+        private static void MoveTriangleDown()
+        {
+            
+            
+                //Move Triangle Down
+                vertices[1] -= 0.00001f;
+                vertices[4] -= 0.00001f;
+                vertices[7] -= 0.00001f;
+            
+            
+        }
+        private static void MoveTriangleUp()
+        {
+            //Move Triangle Up
+            vertices[1] += 0.00001f;
+            vertices[4] += 0.00001f;
+            vertices[7] += 0.00001f;
+        }
+
+        private static void ScaleDownTriangle()
+        {
+            //Shrink Triangle
+            if (vertices[7] > 0f)
+            {
+                vertices[7] -= 0.00001f;
+            }
+
+            if (vertices[0] < 0f)
+            {
+                vertices[0] += 0.00001f;
+            }
+
+            if (vertices[3] > 0f)
+            {
+                vertices[3] -= 0.00001f;
+            }
+        }
+
+        private static void ScaleUpTriangle()
+        {
+            //Scale Triangle up
+            vertices[7] += 0.00001f;
+            vertices[0] -= 0.00001f;
+            vertices[3] += 0.00001f;
         }
 
         private static unsafe void LoadTriangleIntoBuffer()
@@ -69,11 +138,6 @@ namespace SharpEngine
             UpdateTriangleBuffer();
             unsafe
             {
-                // fixed (float* vertex = &vertices[0])
-                // {
-                //     glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertices.Length, vertex, GL_STATIC_DRAW);
-                // }
-
                 glVertexAttribPointer(0, 3, GL_FLOAT, false, 3 * sizeof(float), NULL);
             }
 
@@ -104,6 +168,7 @@ namespace SharpEngine
             var program = glCreateProgram();
             glAttachShader(program, vertexShader);
             glAttachShader(program, fragmentShader);
+            //Shaders activated
             glLinkProgram(program);
             glUseProgram(program);
         }
