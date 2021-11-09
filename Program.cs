@@ -12,13 +12,15 @@ namespace SharpEngine
         static void Main(string[] args)
         {
             Glfw.Init();
-            // Glfw.WindowHint(Hint.ClientApi, ClientApi.OpenGL);
-            // Glfw.WindowHint(Hint.ContextVersionMajor, 3);
-            // Glfw.WindowHint(Hint.ContextVersionMinor, 3);
-            // Glfw.WindowHint(Hint.Decorated, true);
-            // Glfw.WindowHint(Hint.OpenglProfile, Profile.Core);
-            // Glfw.WindowHint(Hint.OpenglForwardCompatible, Constants.True);
+            Glfw.WindowHint(Hint.Doublebuffer, Constants.False);
+            Glfw.WindowHint(Hint.ClientApi, ClientApi.OpenGL);
+            Glfw.WindowHint(Hint.ContextVersionMajor, 3);
+            Glfw.WindowHint(Hint.ContextVersionMinor, 3);
+            Glfw.WindowHint(Hint.Decorated, true);
+            Glfw.WindowHint(Hint.OpenglProfile, Profile.Core);
+            Glfw.WindowHint(Hint.OpenglForwardCompatible, Constants.True);
 
+            //Create and launch a window
             var window = Glfw.CreateWindow(_width, _height, "SharpEngine", Monitor.None, Window.None);
             Glfw.MakeContextCurrent(window);
             Import(Glfw.GetProcAddress);
@@ -30,13 +32,15 @@ namespace SharpEngine
                 .5f, -.5f, 0f,
                 0f, .5f, 0f
             };
+            
+            //Load the vertices into a buffer
             //
             var vertexArray = glGenVertexArray();
             //
             var vertexBuffer = glGenBuffer();
             
             glBindVertexArray(vertexArray);
-            glBindBuffer(GL_ARRAY_BUFFER,vertexArray);
+            glBindBuffer(GL_ARRAY_BUFFER,vertexBuffer);
 
             //Here we disregard the safety features.
             unsafe
@@ -51,18 +55,58 @@ namespace SharpEngine
             glEnableVertexAttribArray(0);
 
             
+
+            string vertexShaderSource = @"
+#version 33 core
+in vec 3 pos;
+
+void main()
+{
+gl_Position = vec4(pos.x, pos.y, pos.z, 1.0);
+}
+";
+            string fragmentShaderSource = @"
+#version 330 core
+out vec4 result;
+
+void main()
+{
+result = vec4(1,0,0,1);
+}
+";
+            // create vertex shader
+            var vertexShader = glCreateShader(GL_VERTEX_SHADER);
+            glShaderSource(vertexShader, vertexShaderSource);
+            glCompileShader(vertexShader);
+            
+            //Create fragment shader
+            var fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+            glShaderSource(fragmentShader, fragmentShaderSource);
+            glCompileShader(fragmentShader);
+            
+            //Create shader program - rendering pipeline
+            var program = glCreateProgram();
+            glAttachShader(program,vertexShader);
+            glAttachShader(program,fragmentShader);
+            glLinkProgram(program);
+            glUseProgram(program);
+            
+            //Engine Loop
             //Here we say if the window is closed, it should actually close.
             while (!Glfw.WindowShouldClose(window))
             {
                 //This listens to events. Reacts to window changes like position etc.
                 Glfw.PollEvents();
-                glDrawArrays(GL_LINE_LOOP,0,3);
+                glDrawArrays(GL_TRIANGLES,0,3);
                 //GL_TRIANGLES for filled in triangle, GL_LINE_LOOP for outlined triangle
-                //Makes sure everthing we've asked it to draw, gets drawn
-                Glfw.SwapBuffers(window);
+                //Executes the commands now
+                
+                glFlush();
+                
                 
             }
 
         }
+        
     }
 }
