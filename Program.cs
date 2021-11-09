@@ -12,6 +12,18 @@ namespace SharpEngine
         private static int _width = 1024;
         private static int _height = 768;
         
+        //Creating 3 points for a triangle
+        static float[] vertices = new float[]
+        {
+            //(X,Y,Z)
+            //Vertex 1
+            -.5f, -.5f, 0f,
+            //Vertex 2
+            .5f, -.5f, 0f,
+            //Vertex 3
+            0f, .5f, 0f
+        };
+        
         static void Main(string[] args)
         {
             var window = CreateWindow();
@@ -29,44 +41,49 @@ namespace SharpEngine
                 glDrawArrays(GL_LINE_LOOP,0,3);
                 //GL_TRIANGLES for filled in triangle, GL_LINE_LOOP for outlined triangle
                 //Executes the commands now
-                
                 glFlush();
                 
+                
+                vertices[4] += 0.001f;
+                UpdateTriangleBuffer();
+
+
+
             }
 
         }
 
         private static unsafe void LoadTriangleIntoBuffer()
         {
-            //Creating 3 points for a triangle
-            float[] vertices = new float[]
-            {
-                -.5f, -.5f, 0f,
-                .5f, -.5f, 0f,
-                0f, .5f, 0f
-            };
 
             //Load the vertices into a buffer
-            //
             var vertexArray = glGenVertexArray();
-            //
             var vertexBuffer = glGenBuffer();
 
             glBindVertexArray(vertexArray);
             glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
 
             //Here we disregard the safety features.
+            UpdateTriangleBuffer();
             unsafe
             {
-                fixed (float* vertex = &vertices[0])
-                {
-                    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertices.Length, vertex, GL_STATIC_DRAW);
-                }
+                // fixed (float* vertex = &vertices[0])
+                // {
+                //     glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertices.Length, vertex, GL_STATIC_DRAW);
+                // }
 
                 glVertexAttribPointer(0, 3, GL_FLOAT, false, 3 * sizeof(float), NULL);
             }
 
             glEnableVertexAttribArray(0);
+        }
+
+        static unsafe void UpdateTriangleBuffer()
+        {
+            fixed (float* vertex = &vertices[0])
+            {
+                glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertices.Length, vertex, GL_STATIC_DRAW);
+            }
         }
 
         private static void CreateShaderProgram()
