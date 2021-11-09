@@ -38,6 +38,8 @@ namespace SharpEngine
             {
                 //This listens to events. Reacts to window changes like position etc.
                 Glfw.PollEvents();
+                glClearColor(0.2f,.05f,.2f,.1f);
+                glClear(GL_COLOR_BUFFER_BIT);
                 glDrawArrays(GL_LINE_LOOP,0,3);
                 //GL_TRIANGLES for filled in triangle, GL_LINE_LOOP for outlined triangle
                 //Executes the commands now
