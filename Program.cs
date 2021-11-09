@@ -5,23 +5,22 @@ namespace SharpEngine
 {
     class Program
     {
+        public static int _width = 1024;
+        public static int _height = 768;
         static void Main(string[] args)
         {
-            var window = new NativeWindow(800, 600, "MyWindowTitle");
-             // Main application loop
-                while (!window.IsClosing)
-                {
-                    // OpenGL rendering
-                    // Implement any timing for flow control, etc (see Glfw.GetTime())
-        
-                    // Swap the front/back buffers
-                    window.SwapBuffers();
-        
-                    // Poll native operating system events (must be called or OS will think application is hanging)
-                    Glfw.PollEvents();
-                }
+            Glfw.Init();
 
-            window.Dispose();
+            var window = Glfw.CreateWindow(_width, _height, "SharpEngine", Monitor.None, Window.None);
+            Glfw.MakeContextCurrent(window);
+
+            
+            //Here we say if the window is closed, it should actually close.
+            while (!Glfw.WindowShouldClose(window))
+            {
+                //This listens to events. Reacts to window changes like position etc.
+                Glfw.PollEvents();
+            }
 
         }
     }
