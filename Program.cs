@@ -57,8 +57,8 @@ namespace SharpEngine
             
 
             string vertexShaderSource = @"
-#version 33 core
-in vec 3 pos;
+#version 330 core
+in vec3 pos;
 
 void main()
 {
@@ -97,7 +97,7 @@ result = vec4(1,0,0,1);
             {
                 //This listens to events. Reacts to window changes like position etc.
                 Glfw.PollEvents();
-                glDrawArrays(GL_TRIANGLES,0,3);
+                glDrawArrays(GL_LINE_LOOP,0,3);
                 //GL_TRIANGLES for filled in triangle, GL_LINE_LOOP for outlined triangle
                 //Executes the commands now
                 
