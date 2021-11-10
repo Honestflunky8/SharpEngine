@@ -16,7 +16,14 @@ namespace SharpEngine
         private static int _width = 1024;
         private static int _height = 768;
         public static bool toggle = false;
-
+        
+        private static bool goingLeft = false;
+        private static bool goingRight = true;
+        private static bool goingDown = false;
+        private static bool goingUp = true;
+        private static bool scalingUp;
+        private static bool scalingDown = true;
+        
         private static Random random = new Random();
         float randomFloat = (float) random.NextDouble();
 
@@ -36,6 +43,27 @@ namespace SharpEngine
                 this.y = y;
                 this.z = 0;
             }
+
+            public static Vector operator *(Vector v, float f)
+            {
+                return new Vector(v.x * f, v.y * f, v.z * f);
+            }
+
+            public static Vector operator +(Vector v, float f)
+            {
+                //new Vector(v.x + f, v.y + f, v.z + f);
+                return new Vector(v.x + f, v.y + f, v.z + f);
+            }
+
+            public static Vector operator -(Vector v, float f)
+            {
+                return new Vector(v.x - f, v.y - f, v.z - f);
+            }
+
+            public static Vector operator /(Vector v, float f)
+            {
+                return new Vector(v.x / f, v.y / f, v.z / f);
+            }
             
         }
         
@@ -49,12 +77,10 @@ namespace SharpEngine
             //Vertex 3
             new Vector(0f, .5f, 0f),
             
-            //Vertex 4
-            new Vector(.4f, .4f, 0f),
-            //Vertex 5
-            new Vector(.6f, .4f, 0f),
-            //Vertex 6
-            new Vector( .5f, .6f, 0f),
+           //Triangle 2
+            // new Vector(.4f, .4f, 0f),
+            // new Vector(.6f, .4f, 0f),
+            // new Vector( .5f, .6f, 0f),
             
         };
 
@@ -62,7 +88,7 @@ namespace SharpEngine
         private const int VertexY = 1;
         private const int VertexSize = 3;
          
-        
+        private static readonly float scaleX = vertices[0].x;
         static void Main(string[] args)
         {
             
@@ -73,10 +99,12 @@ namespace SharpEngine
 
             CreateShaderProgram();
 
+                
             //Engine Loop
             //Here we say if the window is closed, it should actually close.
             while (!Glfw.WindowShouldClose(window))
             {
+                
                 //This listens to events. Reacts to window changes like position etc.
                 Glfw.PollEvents();
                 if (Glfw.GetKey(window, Keys.Escape) == InputState.Press)
@@ -88,12 +116,15 @@ namespace SharpEngine
                 //ScaleTriangleUp();
                 //ScaleUpTriangle();
                 //MoveTriangleDown();
-                MoveTriangleRight();
+               LeftRightCollision();
+                UpDownCollision();
                 //ScaleDownTriangle();
+                //Scaling(scaleX);
+                
+                
+                
+                
                 UpdateTriangleBuffer();
-
-
-
             }
 
         }
@@ -183,18 +214,123 @@ namespace SharpEngine
         }
         
         //************************************************//
-        private static void MoveTriangleRight()
+        private static void LeftRightCollision()
         {
-            for (var i = VertexX; i < vertices.Length; i += VertexSize)
+            
+            for (var i = 0; i < vertices.Length; i++)
             {
-                vertices[i].x += 0.001f;
+                
+                //Hits Right side
+                if (vertices[i].x >= 1f)
+                {
+                    goingLeft = true;
+                    goingRight = false;
+                }
+                //Hits Left side
+                if (vertices[i].x <= -1f)
+                {
+                    goingRight = true;
+                    goingLeft = false;
+                }
+                
+                if (goingLeft)
+                {
+                    vertices[i].x -= 0.002f;
+                }
+                else if (goingRight)
+                {
+                    vertices[i].x += 0.002f;
+                }
+            }
+        }
+
+        private static void UpDownCollision()
+        {
+            for (var i = 0; i < vertices.Length; i++)
+            {
+                //Hits Top side
+            if (vertices[i].y >= 1f)
+            {
+                goingDown = true;
+                goingUp = false;
+            }
+            //Hits Bottom side
+            if (vertices[i].y <= -1f)
+            {
+                goingUp = true;
+                goingDown = false;
+            }
+                
+            if (goingDown)
+            {
+                vertices[i].y -= 0.004f;
+            }
+            if (goingUp)
+            {
+                vertices[i].y += 0.003f;
+            } 
+            }
+        }
+
+        private static void Scaling(float xScale)
+        {
+           
+            if (vertices[0].x <= xScale / 2)
+            {
+                scalingDown = false;
+                scalingUp = true;
+            }
+            if (vertices[0].x >= xScale)
+            {
+                scalingDown = true;
+                scalingUp = false;
+            }
+            
+            for (var i = 0; i < vertices.Length; i++)
+            {
+
+                
+                // Scaling Down
+                // if (vertices[i].x >= 1f && vertices[i].y >= 1f)
+                // {
+                //     scalingDown = true;
+                //     scalingUp = false;
+                // }
+                // if (vertices[i].x >= vertices[i].x / 2 && vertices[i].y >= vertices[i].y / 2)
+                // {
+                //     scalingDown = true;
+                //     scalingUp = false;
+                // }
+
+                // Scaling Up
+                // if (vertices[i].x <= 0.5f && vertices[i].y <= 0.5f)
+                // {
+                //     scalingDown = false;
+                //     scalingUp = true;
+                // }
+                // if (vertices[i].x <= vertices[i].x / 2 && vertices[i].y <= vertices[i].y / 2)
+                // {
+                //     scalingDown = false;
+                //     scalingUp = true;
+                // }
+
+                if (scalingDown)
+                {
+                    vertices[i] *= 0.99f;
+                }
+                if (scalingUp)
+                {
+                    vertices[i]  *= 1.001f;
+                }
+                
+                
             }
         }
         private static void MoveTriangleLeft()
         {
             for (var i = VertexX; i < vertices.Length; i += VertexSize)
             {
-                vertices[i].x -= 0.001f;
+                vertices[i] -= 0.001f;
             }
         }
 
@@ -202,7 +338,7 @@ namespace SharpEngine
         {
             for (var i = VertexY; i < vertices.Length; i += VertexSize)
             {
-                vertices[i].y -= 0.001f;
+                vertices[i] -= 0.001f;
                 
             }
         }
@@ -210,7 +346,7 @@ namespace SharpEngine
         {
             for (var i = VertexY; i < vertices.Length; i += VertexSize)
             {
-                vertices[i].y += 0.001f;
+                vertices[i] += 0.001f;
             }
         }
 
@@ -236,7 +372,7 @@ namespace SharpEngine
             //Scale Triangle up
             for (int i = 0; i < vertices.Length; i++)
             {
-                vertices[i].x *= 1.001f;
+                vertices[i]  *= 1.001f;
             }
         }
         //************************************************//
