@@ -21,8 +21,10 @@ namespace SharpEngine
         private static bool goingRight = true;
         private static bool goingDown = false;
         private static bool goingUp = true;
+        
         private static bool scalingUp;
         private static bool scalingDown = true;
+        
         
         private static Random random = new Random();
         float randomFloat = (float) random.NextDouble();
@@ -84,6 +86,11 @@ namespace SharpEngine
             
         };
 
+        private static Vector2[] velocity = new Vector2[]
+        {
+            new(0.001f, 0.003f),
+            new(0.001f, 0.004f)
+        };
         private const int VertexX = 0;
         private const int VertexY = 1;
         private const int VertexSize = 3;
@@ -116,9 +123,10 @@ namespace SharpEngine
                 //ScaleTriangleUp();
                 //ScaleUpTriangle();
                 //MoveTriangleDown();
-               LeftRightCollision();
-                UpDownCollision();
+               LeftRightCollision(velocity[0]);
+                UpDownCollision(velocity[1], velocity[0]);
                 //ScaleDownTriangle();
+                Scaling();
                 //Scaling(scaleX);
                 
                 
@@ -214,7 +222,7 @@ namespace SharpEngine
         }
         
         //************************************************//
-        private static void LeftRightCollision()
+        private static void LeftRightCollision(Vector2 vector)
         {
             
             for (var i = 0; i < vertices.Length; i++)
@@ -235,16 +243,16 @@ namespace SharpEngine
                 
                 if (goingLeft)
                 {
-                    vertices[i].x -= 0.002f;
+                    vertices[i].x -= vector.X;
                 }
                 else if (goingRight)
                 {
-                    vertices[i].x += 0.002f;
+                    vertices[i].x += vector.X;
                 }
             }
         }
 
-        private static void UpDownCollision()
+        private static void UpDownCollision(Vector2 vector, Vector2 vector2)
         {
             for (var i = 0; i < vertices.Length; i++)
             {
@@ -263,34 +271,49 @@ namespace SharpEngine
                 
             if (goingDown)
             {
-                vertices[i].y -= 0.004f;
+                vertices[i].y -= vector.Y;
             }
             if (goingUp)
             {
-                vertices[i].y += 0.003f;
+                vertices[i].y += vector2.Y;
             } 
             }
         }
 
-        private static void Scaling(float xScale)
+        private static void Scaling()
         {
+            float scale = 1f;
+            float factor = 0.9999f;
+            scale *= factor;
+            
+            //float xScale
            
-            if (vertices[0].x <= xScale / 2)
-            {
-                scalingDown = false;
-                scalingUp = true;
-            }
-            if (vertices[0].x >= xScale)
-            {
-                scalingDown = true;
-                scalingUp = false;
-            }
+            // if (vertices[0].x <= xScale / 2)
+            // {
+            //     scalingDown = false;
+            //     scalingUp = true;
+            // }
+            // if (vertices[0].x >= xScale)
+            // {
+            //     scalingDown = true;
+            //     scalingUp = false;
+            // }
             
             for (var i = 0; i < vertices.Length; i++)
             {
+                
+                vertices[i] *= factor;
+                if (scale <= 0.5f)
+                {
+                    factor = 1.0001f;
+                }
+                if (scale >= 1f)
+                {
+                    factor = 0.9999f;
+                }
 
                 
-                // Scaling Down
+                // //Scaling down
                 // if (vertices[i].x >= 1f && vertices[i].y >= 1f)
                 // {
                 //     scalingDown = true;
