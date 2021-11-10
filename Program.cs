@@ -3,7 +3,9 @@ using System.Drawing;
 using System.IO;
 using System.Numerics;
 using GLFW;
+using OpenGL;
 using static OpenGL.Gl;
+
 
 namespace SharpEngine
 {
@@ -12,6 +14,9 @@ namespace SharpEngine
         private static int _width = 1024;
         private static int _height = 768;
         public static bool toggle = false;
+
+        private static Random random = new Random();
+        float randomFloat = (float) random.NextDouble();
         
         //Creating 3 points for a triangle
         static float[] vertices = new float[]
@@ -22,11 +27,19 @@ namespace SharpEngine
             //Vertex 2
             .5f, -.5f, 0f,
             //Vertex 3
-            0f, .5f, 0f
+            0f, .5f, 0f,
+            //Vertex 4
         };
+
+        private const int VertexX = 0;
+        private const int VertexY = 1;
+        private const int VertexSize = 3;
+         
         
         static void Main(string[] args)
         {
+            
+            
             var window = CreateWindow();
 
             LoadTriangleIntoBuffer();
@@ -41,15 +54,12 @@ namespace SharpEngine
                 Glfw.PollEvents();
                 if (Glfw.GetKey(window, Keys.Escape) == InputState.Press)
                     Glfw.SetWindowShouldClose(window, true);
-                glClearColor(0.2f,.05f,.2f,.1f);
-                glClear(GL_COLOR_BUFFER_BIT);
-                glDrawArrays(GL_LINE_LOOP,0,3);
-                //GL_TRIANGLES for filled in triangle, GL_LINE_LOOP for outlined triangle
-                //Executes the commands now
-                glFlush();
+                ClearScreen();
+                Render();
 
 
-                
+                MoveTriangleDown();
+                //MoveTriangleRight();
                 
                 UpdateTriangleBuffer();
 
@@ -58,43 +68,50 @@ namespace SharpEngine
             }
 
         }
-        
 
-        
+        private static void Render()
+        {
+            glDrawArrays(GL_LINE_LOOP, 0, vertices.Length/VertexSize);
+            //GL_TRIANGLES for filled in triangle, GL_LINE_LOOP for outlined triangle
+            //Executes the commands now
+            glFlush();
+        }
+
+        private static void ClearScreen()
+        {
+            glClearColor(0.2f, .05f, .2f, .1f);
+            glClear(GL_COLOR_BUFFER_BIT);
+        }
+
 
         private static void MoveTriangleRight()
         {
-            
-            //Move triangle right
-            vertices[0] += 0.00001f;
-            vertices[3] += 0.00001f;
-            vertices[6] += 0.00001f;
+            for (var i = VertexX; i < vertices.Length; i += VertexSize)
+            {
+                vertices[i] += 0.00001f;
+            }
         }
         private static void MoveTriangleLeft()
         {
-            //Move triangle right
-            vertices[0] -= 0.00001f;
-            vertices[3] -= 0.00001f;
-            vertices[6] -= 0.00001f;
+            for (var i = VertexX; i < vertices.Length; i += VertexSize)
+            {
+                vertices[i] -= 0.00001f;
+            }
         }
 
         private static void MoveTriangleDown()
         {
-            
-            
-                //Move Triangle Down
-                vertices[1] -= 0.00001f;
-                vertices[4] -= 0.00001f;
-                vertices[7] -= 0.00001f;
-            
-            
+            for (var i = VertexY; i < vertices.Length; i += VertexSize)
+            {
+                vertices[i] -= 0.00001f;
+            }
         }
         private static void MoveTriangleUp()
         {
-            //Move Triangle Up
-            vertices[1] += 0.00001f;
-            vertices[4] += 0.00001f;
-            vertices[7] += 0.00001f;
+            for (var i = VertexY; i < vertices.Length; i += VertexSize)
+            {
+                vertices[i] += 0.00001f;
+            }
         }
 
         private static void ScaleDownTriangle()
@@ -138,7 +155,7 @@ namespace SharpEngine
             UpdateTriangleBuffer();
             unsafe
             {
-                glVertexAttribPointer(0, 3, GL_FLOAT, false, 3 * sizeof(float), NULL);
+                glVertexAttribPointer(0, VertexSize, GL_FLOAT, false, VertexSize * sizeof(float), NULL);
             }
 
             glEnableVertexAttribArray(0);
@@ -156,12 +173,12 @@ namespace SharpEngine
         {
             // create vertex shader
             var vertexShader = glCreateShader(GL_VERTEX_SHADER);
-            glShaderSource(vertexShader, File.ReadAllText("Shaders/red-triangle.vert"));
+            glShaderSource(vertexShader, File.ReadAllText("Shaders/screen-coordinates.vert"));
             glCompileShader(vertexShader);
 
             //Create fragment shader
             var fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-            glShaderSource(fragmentShader, File.ReadAllText("Shaders/green-triangle.frag"));
+            glShaderSource(fragmentShader, File.ReadAllText("Shaders/green.frag"));
             glCompileShader(fragmentShader);
 
             //Create shader program - rendering pipeline
