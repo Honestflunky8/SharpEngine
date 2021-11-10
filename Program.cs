@@ -11,24 +11,51 @@ namespace SharpEngine
 {
     class Program
     {
+        
+        
         private static int _width = 1024;
         private static int _height = 768;
         public static bool toggle = false;
 
         private static Random random = new Random();
         float randomFloat = (float) random.NextDouble();
+
+        struct Vector
+        {
+            public float x, y, z;
+
+            public Vector(float x, float y, float z)
+            {
+                this.x = x;
+                this.y = y;
+                this.z = z;
+            }
+            public Vector(float x, float y)
+            {
+                this.x = x;
+                this.y = y;
+                this.z = 0;
+            }
+            
+        }
         
         //Creating 3 points for a triangle
-        static float[] vertices = new float[]
+        static Vector[] vertices = new Vector[]
         {
-            //(X,Y,Z)
             //Vertex 1
-            -.5f, -.5f, 0f,
+            new Vector(-.5f, -.5f, 0f),
             //Vertex 2
-            .5f, -.5f, 0f,
+           new Vector(.5f, -.5f, 0f),
             //Vertex 3
-            0f, .5f, 0f,
+            new Vector(0f, .5f, 0f),
+            
             //Vertex 4
+            new Vector(.4f, .4f, 0f),
+            //Vertex 5
+            new Vector(.6f, .4f, 0f),
+            //Vertex 6
+            new Vector( .5f, .6f, 0f),
+            
         };
 
         private const int VertexX = 0;
@@ -55,12 +82,14 @@ namespace SharpEngine
                 if (Glfw.GetKey(window, Keys.Escape) == InputState.Press)
                     Glfw.SetWindowShouldClose(window, true);
                 ClearScreen();
-                Render();
+                Render(window);
 
 
-                MoveTriangleDown();
-                //MoveTriangleRight();
-                
+                //ScaleTriangleUp();
+                //ScaleUpTriangle();
+                //MoveTriangleDown();
+                MoveTriangleRight();
+                //ScaleDownTriangle();
                 UpdateTriangleBuffer();
 
 
@@ -69,12 +98,13 @@ namespace SharpEngine
 
         }
 
-        private static void Render()
+         static void Render(Window window)
         {
-            glDrawArrays(GL_LINE_LOOP, 0, vertices.Length/VertexSize);
+            glDrawArrays(GL_TRIANGLES, 0, vertices.Length);
             //GL_TRIANGLES for filled in triangle, GL_LINE_LOOP for outlined triangle
             //Executes the commands now
-            glFlush();
+            //glFlush();
+            Glfw.SwapBuffers(window);
         }
 
         private static void ClearScreen()
@@ -82,64 +112,8 @@ namespace SharpEngine
             glClearColor(0.2f, .05f, .2f, .1f);
             glClear(GL_COLOR_BUFFER_BIT);
         }
-
-
-        private static void MoveTriangleRight()
-        {
-            for (var i = VertexX; i < vertices.Length; i += VertexSize)
-            {
-                vertices[i] += 0.00001f;
-            }
-        }
-        private static void MoveTriangleLeft()
-        {
-            for (var i = VertexX; i < vertices.Length; i += VertexSize)
-            {
-                vertices[i] -= 0.00001f;
-            }
-        }
-
-        private static void MoveTriangleDown()
-        {
-            for (var i = VertexY; i < vertices.Length; i += VertexSize)
-            {
-                vertices[i] -= 0.00001f;
-            }
-        }
-        private static void MoveTriangleUp()
-        {
-            for (var i = VertexY; i < vertices.Length; i += VertexSize)
-            {
-                vertices[i] += 0.00001f;
-            }
-        }
-
-        private static void ScaleDownTriangle()
-        {
-            //Shrink Triangle
-            if (vertices[7] > 0f)
-            {
-                vertices[7] -= 0.00001f;
-            }
-
-            if (vertices[0] < 0f)
-            {
-                vertices[0] += 0.00001f;
-            }
-
-            if (vertices[3] > 0f)
-            {
-                vertices[3] -= 0.00001f;
-            }
-        }
-
-        private static void ScaleUpTriangle()
-        {
-            //Scale Triangle up
-            vertices[7] += 0.00001f;
-            vertices[0] -= 0.00001f;
-            vertices[3] += 0.00001f;
-        }
+        
+        
 
         private static unsafe void LoadTriangleIntoBuffer()
         {
@@ -155,7 +129,7 @@ namespace SharpEngine
             UpdateTriangleBuffer();
             unsafe
             {
-                glVertexAttribPointer(0, VertexSize, GL_FLOAT, false, VertexSize * sizeof(float), NULL);
+                glVertexAttribPointer(0, VertexSize, GL_FLOAT, false, sizeof(Vector), NULL);
             }
 
             glEnableVertexAttribArray(0);
@@ -163,9 +137,9 @@ namespace SharpEngine
 
         static unsafe void UpdateTriangleBuffer()
         {
-            fixed (float* vertex = &vertices[0])
+            fixed (Vector* vertex = &vertices[0])
             {
-                glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertices.Length, vertex, GL_STATIC_DRAW);
+                glBufferData(GL_ARRAY_BUFFER, sizeof(Vector) * vertices.Length, vertex, GL_DYNAMIC_DRAW);
             }
         }
 
@@ -193,7 +167,7 @@ namespace SharpEngine
         private static Window CreateWindow()
         {
             Glfw.Init();
-            Glfw.WindowHint(Hint.Doublebuffer, Constants.False);
+            Glfw.WindowHint(Hint.Doublebuffer, Constants.True);
             Glfw.WindowHint(Hint.ClientApi, ClientApi.OpenGL);
             Glfw.WindowHint(Hint.ContextVersionMajor, 3);
             Glfw.WindowHint(Hint.ContextVersionMinor, 3);
@@ -207,5 +181,67 @@ namespace SharpEngine
             Import(Glfw.GetProcAddress);
             return window;
         }
+        
+        //************************************************//
+        private static void MoveTriangleRight()
+        {
+            for (var i = VertexX; i < vertices.Length; i += VertexSize)
+            {
+                vertices[i].x += 0.001f;
+            }
+        }
+        private static void MoveTriangleLeft()
+        {
+            for (var i = VertexX; i < vertices.Length; i += VertexSize)
+            {
+                vertices[i].x -= 0.001f;
+            }
+        }
+
+        private static void MoveTriangleDown()
+        {
+            for (var i = VertexY; i < vertices.Length; i += VertexSize)
+            {
+                vertices[i].y -= 0.001f;
+                
+            }
+        }
+        private static void MoveTriangleUp()
+        {
+            for (var i = VertexY; i < vertices.Length; i += VertexSize)
+            {
+                vertices[i].y += 0.001f;
+            }
+        }
+
+        private static void ScaleTriangleUp()
+        {
+            for (var i = VertexY; i < vertices.Length; i += VertexSize)
+            {
+                vertices[i].x *= 1.001f;
+            }
+        }
+
+        private static void ScaleDownTriangle()
+        {
+
+            for (int i = 0; i < vertices.Length; i++)
+            {
+                vertices[i].x *= 0.99f;
+            }
+        }
+
+        private static void ScaleUpTriangle()
+        {
+            //Scale Triangle up
+            for (int i = 0; i < vertices.Length; i++)
+            {
+                vertices[i].x *= 1.001f;
+            }
+        }
+        //************************************************//
+        
+        
+        
     }
 }
