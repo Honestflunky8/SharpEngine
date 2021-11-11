@@ -3,6 +3,7 @@ using System.Drawing;
 using System.IO;
 using System.Numerics;
 using GLFW;
+using Microsoft.VisualBasic.CompilerServices;
 using OpenGL;
 using static OpenGL.Gl;
 
@@ -24,6 +25,8 @@ namespace SharpEngine
         
         private static bool scalingUp;
         private static bool scalingDown = true;
+        public static float scale = 1f;
+        public static float factor = 0.999f;
         
         
         private static Random random = new Random();
@@ -51,20 +54,44 @@ namespace SharpEngine
                 return new Vector(v.x * f, v.y * f, v.z * f);
             }
 
-            public static Vector operator +(Vector v, float f)
-            {
-                //new Vector(v.x + f, v.y + f, v.z + f);
-                return new Vector(v.x + f, v.y + f, v.z + f);
+            // public static Vector operator +(Vector v, float f)
+            // {
+            //     //new Vector(v.x + f, v.y + f, v.z + f);
+            //     return new Vector(v.x + f, v.y + f, v.z + f);
+            // }
+            
+            public static Vector operator +(Vector lhs, Vector rhs) {
+                return new Vector(lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z);
+            }
+            public static Vector operator -(Vector lhs, Vector rhs) {
+                return new Vector(lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z);
             }
 
-            public static Vector operator -(Vector v, float f)
-            {
-                return new Vector(v.x - f, v.y - f, v.z - f);
-            }
+            // public static Vector operator -(Vector v, float f)
+            // {
+            //     return new Vector(v.x - f, v.y - f, v.z - f);
+            // }
 
             public static Vector operator /(Vector v, float f)
             {
                 return new Vector(v.x / f, v.y / f, v.z / f);
+            }
+
+            public static Vector Max(Vector a, Vector b)
+            {
+                //return new Vector (Max(a.x, b.x),Max(a.x, b.x));
+                float maxX = MathF.Max(a.x, b.x);
+               float maxY =  MathF.Max(a.y, b.y);
+               float maxZ =  MathF.Max(a.z, b.z);
+               return new Vector(maxX, maxY, maxZ);
+            }
+            public static Vector Min(Vector a, Vector b)
+            {
+                //return new Vector (Max(a.x, b.x),Max(a.x, b.x));
+                float minX = MathF.Min(a.x, b.x);
+                float minY =  MathF.Min(a.y, b.y);
+                float minZ =  MathF.Min(a.z, b.z);
+                return new Vector(minX, minY, minZ);
             }
             
         }
@@ -88,8 +115,8 @@ namespace SharpEngine
 
         private static Vector2[] velocity = new Vector2[]
         {
-            new(0.001f, 0.003f),
-            new(0.001f, 0.004f)
+            new(0.005f, 0.003f),
+            new(0.005f, 0.004f)
         };
         private const int VertexX = 0;
         private const int VertexY = 1;
@@ -98,6 +125,15 @@ namespace SharpEngine
         private static readonly float scaleX = vertices[0].x;
         static void Main(string[] args)
         {
+            Console.WriteLine(Vector.Max(new Vector(1, 3), new Vector(4, 5)).x); // Output: 4
+            Console.WriteLine(Vector.Max(new Vector(1, 3), new Vector(4, 5)).y); // Output: 5
+            Console.WriteLine(Vector.Min(new Vector(1, 3), new Vector(4, 5)).x); // Output: 1
+            Console.WriteLine(Vector.Min(new Vector(1, 3), new Vector(4, 5)).y); // Output: 3
+
+            Console.WriteLine(Vector.Max(new Vector(3, 1), new Vector(2, 4)).x); // Output: 3
+            Console.WriteLine(Vector.Max(new Vector(3, 1), new Vector(2, 4)).y); // Output: 4
+            Console.WriteLine(Vector.Min(new Vector(3, 1), new Vector(2, 4)).x); // Output: 2
+            Console.WriteLine(Vector.Min(new Vector(3, 1), new Vector(2, 4)).y); // Output: 1
             
             
             var window = CreateWindow();
@@ -106,6 +142,7 @@ namespace SharpEngine
 
             CreateShaderProgram();
 
+            
                 
             //Engine Loop
             //Here we say if the window is closed, it should actually close.
@@ -128,6 +165,7 @@ namespace SharpEngine
                 //ScaleDownTriangle();
                 Scaling();
                 //Scaling(scaleX);
+                
                 
                 
                 
@@ -279,99 +317,75 @@ namespace SharpEngine
             } 
             }
         }
-
         private static void Scaling()
         {
-            float scale = 1f;
-            float factor = 0.9999f;
+            
             scale *= factor;
-            
-            //float xScale
-           
-            // if (vertices[0].x <= xScale / 2)
-            // {
-            //     scalingDown = false;
-            //     scalingUp = true;
-            // }
-            // if (vertices[0].x >= xScale)
-            // {
-            //     scalingDown = true;
-            //     scalingUp = false;
-            // }
-            
+            if (scale <= 0.5f)
+            { 
+                factor = 1.001f;
+            }
+            if (scale >= 1f)
+            {
+                factor = 0.999f;
+            }
+
+            var min = vertices[0];
+            for (int i = 1; i < vertices.Length ;i++)
+            {
+                min = Vector.Min(min, vertices[i]);
+            }
+            var max = vertices[0];
+            for (int i = 1; i < vertices.Length ;i++)
+            {
+                max = Vector.Max(max, vertices[i]);
+            }
+
+            var center = (min + max) / 2;
             for (var i = 0; i < vertices.Length; i++)
             {
+                vertices[i] -= center;
+            }
                 
+            for (var i = 0; i < vertices.Length; i++)
+            {
                 vertices[i] *= factor;
-                if (scale <= 0.5f)
-                {
-                    factor = 1.0001f;
-                }
-                if (scale >= 1f)
-                {
-                    factor = 0.9999f;
-                }
-
-                
-                // //Scaling down
-                // if (vertices[i].x >= 1f && vertices[i].y >= 1f)
-                // {
-                //     scalingDown = true;
-                //     scalingUp = false;
-                // }
-                // if (vertices[i].x >= vertices[i].x / 2 && vertices[i].y >= vertices[i].y / 2)
-                // {
-                //     scalingDown = true;
-                //     scalingUp = false;
-                // }
-
-                // Scaling Up
-                // if (vertices[i].x <= 0.5f && vertices[i].y <= 0.5f)
-                // {
-                //     scalingDown = false;
-                //     scalingUp = true;
-                // }
-                // if (vertices[i].x <= vertices[i].x / 2 && vertices[i].y <= vertices[i].y / 2)
-                // {
-                //     scalingDown = false;
-                //     scalingUp = true;
-                // }
-
-                if (scalingDown)
-                {
-                    vertices[i] *= 0.99f;
-                }
-                if (scalingUp)
-                {
-                    vertices[i]  *= 1.001f;
-                }
-                
-                
             }
-        }
-        private static void MoveTriangleLeft()
-        {
-            for (var i = VertexX; i < vertices.Length; i += VertexSize)
+            for (var i = 0; i < vertices.Length; i++)
             {
-                vertices[i] -= 0.001f;
+                vertices[i] += center;
             }
-        }
 
-        private static void MoveTriangleDown()
-        {
-            for (var i = VertexY; i < vertices.Length; i += VertexSize)
-            {
-                vertices[i] -= 0.001f;
-                
-            }
-        }
-        private static void MoveTriangleUp()
-        {
-            for (var i = VertexY; i < vertices.Length; i += VertexSize)
-            {
-                vertices[i] += 0.001f;
-            }
-        }
+
+            
+            
+
+            
+        
+    }
+        // private static void MoveTriangleLeft()
+        // {
+        //     for (var i = VertexX; i < vertices.Length; i += VertexSize)
+        //     {
+        //         vertices[i] -= 0.001f;
+        //     }
+        // }
+        //
+        // private static void MoveTriangleDown()
+        // {
+        //     for (var i = VertexY; i < vertices.Length; i += VertexSize)
+        //     {
+        //         vertices[i] -= 0.001f;
+        //         
+        //     }
+        // }
+        // private static void MoveTriangleUp()
+        // {
+        //     for (var i = VertexY; i < vertices.Length; i += VertexSize)
+        //     {
+        //         vertices[i] += 0.001f;
+        //     }
+        // }
 
         private static void ScaleTriangleUp()
         {
