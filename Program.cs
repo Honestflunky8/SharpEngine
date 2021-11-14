@@ -12,15 +12,24 @@ namespace SharpEngine
             new Vertex[] {
                 new Vertex(new Vector(0.1f, 0f), Color.Red),
                 new Vertex(new Vector(1f, 0f), Color.Greenish),
-                new Vertex(new Vector(.4f, .5f), Color.Blue)
+                new Vertex(new Vector(.4f, .5f), Color.Blue),
+                
+                new Vertex(new Vector(.4f, 1f), Color.Red),
+                new Vertex(new Vector(1f, .4f), Color.Greenish),
+                new Vertex(new Vector(.3f, .2f), Color.Blue),
             }
         );
+        // static Triangle triangle2 = new Triangle (
+        //     new Vertex[] {
+        //         new Vertex(new Vector(.4f, 0f), Color.Red),
+        //         new Vertex(new Vector(1f, .4f), Color.Greenish),
+        //         new Vertex(new Vector(.3f, .2f), Color.Blue),
+        //     }
+        // );
         
         static void Main(string[] args) {
             
             var window = CreateWindow();
-
-            LoadTriangleIntoBuffer();
 
             CreateShaderProgram();
 
@@ -85,17 +94,6 @@ namespace SharpEngine
             glAttachShader(program, fragmentShader);
             glLinkProgram(program);
             glUseProgram(program);
-        }
-
-        static unsafe void LoadTriangleIntoBuffer() {
-            var vertexArray = glGenVertexArray();
-            var vertexBuffer = glGenBuffer();
-            glBindVertexArray(vertexArray);
-            glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-            glVertexAttribPointer(0, 3, GL_FLOAT, false, sizeof(Vertex), Marshal.OffsetOf(typeof(Vertex), nameof(Vertex.position)));
-            glVertexAttribPointer(1, 4, GL_FLOAT, false, sizeof(Vertex), Marshal.OffsetOf(typeof(Vertex), nameof(Vertex.color)));
-            glEnableVertexAttribArray(0);
-            glEnableVertexAttribArray(1);
         }
 
         static Window CreateWindow() {
