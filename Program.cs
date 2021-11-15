@@ -14,7 +14,7 @@ namespace SharpEngine
         
         static void FillSceneWithTriangles(Scene scene, Material material) {
             var random = new Random();
-            for (var i = 0; i < 3; i++) {
+            for (var i = 0; i < 10; i++) {
                 var triangle = new Triangle(new Vertex[] {
                     new Vertex(new Vector(-.1f, 0f), Color.Red),
                     new Vertex(new Vector(.1f, 0f), Color.Green),
@@ -29,16 +29,22 @@ namespace SharpEngine
         static void Main(string[] args) {
             
             var window = new Window();
-            var material = new Material("shaders/position-color.vert", "shaders/vertex-color.frag");
+            var material = new Material("shaders/world-position-color.vert", "shaders/vertex-color.frag");
             var scene = new Scene();
             window.Load(scene);
 
-            FillSceneWithTriangles(scene, material);
+            //FillSceneWithTriangles(scene, material);
+            var newTriangle = new Triangle(new Vertex[] {
+                new Vertex(new Vector(-.1f, 0f), Color.Red),
+                new Vertex(new Vector(.1f, 0f), Color.Green),
+                new Vertex(new Vector(0f, .133f), Color.Blue)
+            }, material);
+            scene.Add(newTriangle);
             
             // engine rendering loop
             var direction = new Vector(0.003f, 0.003f);
             var multiplier = 0.99f;
-            var rotation = 0.0005f;
+            var rotation = 0.005f;
             while (window.IsOpen()) {
 
                 // Update Triangles
