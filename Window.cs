@@ -24,7 +24,7 @@ namespace SharpEngine {
             Glfw.WindowHint(Hint.Doublebuffer, Constants.True);
 
             // create and launch a window
-            window = Glfw.CreateWindow(1024, 768, "SharpEngine", Monitor.None, GLFW.Window.None);
+            window = Glfw.CreateWindow(768, 768, "SharpEngine", Monitor.None, GLFW.Window.None);
             Glfw.MakeContextCurrent(window);
             OpenGL.Gl.Import(Glfw.GetProcAddress);
         }
@@ -39,6 +39,11 @@ namespace SharpEngine {
             ClearScreen();
             this.scene?.Render();
             Glfw.SwapBuffers(window);
+        }
+
+        public bool GetKey(Keys key)
+        {
+            return Glfw.GetKey(this.window, key) == InputState.Press;
         }
     }
 }
