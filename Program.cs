@@ -19,15 +19,20 @@ namespace SharpEngine
             var scene = new Scene();
             window.Load(scene);
 
-            var shape = new Triangle(material);
-            shape.Transform.CurrentScale = new Vector(0.5f, 1f, 1f);
-            scene.Add(shape);
+            var triangle = new Triangle(material);
+            triangle.Transform.CurrentScale = new Vector(0.5f, 1f, 1f);
+            scene.Add(triangle);
             
-            var rectangle = new Rectangle(material);
-            rectangle.Transform.CurrentScale = new Vector(0.8f, 3f, 1f);
-            rectangle.Transform.Position = new Vector(0f, 0f);
+            // var rectangle = new Rectangle(material);
+            // rectangle.Transform.CurrentScale = new Vector(0.8f, 3f, 1f);
+            // rectangle.Transform.Position = new Vector(0f, 0f);
+           // scene.Add(rectangle);
+            var circle = new Circle(material);
+            circle.Transform.CurrentScale = new Vector(0.8f, 3f, 1f);
+            circle.Transform.Position = new Vector(0f, 0f);
+            scene.Add(circle);
             
-            scene.Add(rectangle);
+            
 
             
             var ground = new Rectangle(material);
@@ -46,53 +51,62 @@ namespace SharpEngine
                 while (Glfw.Time > previousFixedStep + fixedDeltaTime) {
                     previousFixedStep += fixedDeltaTime;
                     var walkDirection = new Vector();
-                    var recDirection = rectangle.GetCenter() - shape.GetCenter();
+                    var rectangleDirection = circle.GetCenter() - triangle.GetCenter();
 
-                    
-                    if (Vector.Dot(shape.Transform.Forward, recDirection) > 0 )
+                    //Looking at rectangle
+                    if (Vector.Dot(triangle.Transform.Forward, rectangleDirection) > 0 )
                     {
-                        rectangle.SetColor(Color.Red);
+                        circle.SetColor(Color.Red);
                     }
+                    //Looking away from rectangle
                     else 
                     {
-                        rectangle.SetColor(Color.Blue);
+                        circle.SetColor(Color.Green);
                     }
+
+                    float dotProduct = Vector.Dot(circle.GetCenter() - triangle.GetCenter().Normalize(),
+                        triangle.Transform.Forward);
+                    float angle = MathF.Acos(dotProduct);
+                    float factor = angle / MathF.PI; // Dividing makes the Value between 0 and 1 instead of 0 and PI
+                    Color black = new Color(0, 0, 0, 1);
+                    Color white = new Color(1, 1, 1, 0);
+                    circle.SetColor(new Color(factor,factor,factor,1));
 
                     //Movement
                     if (window.GetKey(Keys.W))
                     {
-                        walkDirection += shape.Transform.Forward;
+                        walkDirection += triangle.Transform.Forward;
                     }
                     if (window.GetKey(Keys.S))
                     {
                        // walkDirection += Vector.Backward;
-                       walkDirection += shape.Transform.Backward;
+                       walkDirection += triangle.Transform.Backward;
                     }
                     if (window.GetKey(Keys.A))
                     {
-                        walkDirection += shape.Transform.Left;
+                        walkDirection += triangle.Transform.Left;
                     }
                     if (window.GetKey(Keys.D))
                     {
-                        walkDirection += shape.Transform.Right;
+                        walkDirection += triangle.Transform.Right;
                     }
                     
                     //Rotation
                     if (window.GetKey(Keys.E))
                     {
-                        var rotation = shape.Transform.Rotation;
+                        var rotation = triangle.Transform.Rotation;
                         rotation.z -= (2*MathF.PI * fixedDeltaTime)/3;
-                        shape.Transform.Rotation = rotation;
+                        triangle.Transform.Rotation = rotation;
                     }
                     if (window.GetKey(Keys.Q))
                     {
-                        var rotation = shape.Transform.Rotation;
+                        var rotation = triangle.Transform.Rotation;
                         rotation.z += (2*MathF.PI * fixedDeltaTime)/3;
-                        shape.Transform.Rotation = rotation;
+                        triangle.Transform.Rotation = rotation;
                     }
 
                     walkDirection = walkDirection.Normalize();
-                    shape.Transform.Position += walkDirection * movementSpeed*fixedDeltaTime;
+                    triangle.Transform.Position += walkDirection * movementSpeed*fixedDeltaTime;
                 }
                 window.Render();
             }
