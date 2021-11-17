@@ -4,6 +4,12 @@ namespace SharpEngine {
     public struct Vector {
         public float x, y, z;
 
+        public static Vector Forward => new Vector(0, 1);
+        public static Vector Backward => new Vector(0, -1);
+        public static Vector Left => new Vector(-1, 0);
+        public static Vector Right => new Vector(1, 0);
+        public static Vector Zero => new Vector(0, 0);
+
         public Vector(float x, float y, float z) {
             this.x = x;
             this.y = y;
@@ -56,6 +62,11 @@ namespace SharpEngine {
             var magnitude = GetMagnitude();
             return magnitude > 0 ? this / GetMagnitude() : this;
             
+        }
+
+        public static float Dot(Vector a, Vector b)
+        {
+            return (a.x * b.x + a.y * b.y + a.z * b.z);
         }
     }
 }

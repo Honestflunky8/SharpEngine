@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using static OpenGL.Gl;
 
 namespace SharpEngine {
@@ -16,6 +17,15 @@ namespace SharpEngine {
 			this.material = material;
 			LoadTriangleIntoBuffer();
 			this.Transform = new Transform();
+		}
+
+		public void SetColor(Color color)
+		{
+			for (int i = 0; i < vertices.Length; i++)
+			{
+				vertices[i].color = color;
+			}
+			
 		}
 		
 		 void LoadTriangleIntoBuffer() {

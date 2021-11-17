@@ -22,7 +22,14 @@ namespace SharpEngine
             var shape = new Triangle(material);
             shape.Transform.CurrentScale = new Vector(0.5f, 1f, 1f);
             scene.Add(shape);
+            
+            var rectangle = new Rectangle(material);
+            rectangle.Transform.CurrentScale = new Vector(0.8f, 3f, 1f);
+            rectangle.Transform.Position = new Vector(0f, 0f);
+            
+            scene.Add(rectangle);
 
+            
             var ground = new Rectangle(material);
             ground.Transform.CurrentScale = new Vector(10f, 1f, 1f);
             ground.Transform.Position = new Vector(0f, -1f);
@@ -33,39 +40,55 @@ namespace SharpEngine
             const float fixedDeltaTime = 1.0f / fixedStepNumberPerSecond;
             const float movementSpeed = 0.5f;
             double previousFixedStep = 0.0;
+            
+            
             while (window.IsOpen()) {
                 while (Glfw.Time > previousFixedStep + fixedDeltaTime) {
                     previousFixedStep += fixedDeltaTime;
                     var walkDirection = new Vector();
-                    
+                    var recDirection = rectangle.GetCenter() - shape.GetCenter();
 
+                    
+                    if (Vector.Dot(shape.Transform.Forward, recDirection) > 0 )
+                    {
+                        rectangle.SetColor(Color.Red);
+                    }
+                    else 
+                    {
+                        rectangle.SetColor(Color.Blue);
+                    }
+
+                    //Movement
                     if (window.GetKey(Keys.W))
                     {
-                        walkDirection += new Vector(0, 1);
-                        //shape.Transform.Position += new Vector(0f, movementSpeed*fixedDeltaTime);
+                        walkDirection += shape.Transform.Forward;
                     }
                     if (window.GetKey(Keys.S))
                     {
-                        walkDirection += new Vector(0, -1);
-                       // shape.Transform.Position += new Vector(0f, -movementSpeed*fixedDeltaTime);
+                       // walkDirection += Vector.Backward;
+                       walkDirection += shape.Transform.Backward;
                     }
                     if (window.GetKey(Keys.A))
                     {
-                        walkDirection += new Vector(-1, 0);
-                        //shape.Transform.Position += new Vector(-movementSpeed*fixedDeltaTime, 0f);
+                        walkDirection += shape.Transform.Left;
                     }
                     if (window.GetKey(Keys.D))
                     {
-                        walkDirection += new Vector(1, 0);
-                        //shape.Transform.Position += new Vector(movementSpeed*fixedDeltaTime, 0f);
+                        walkDirection += shape.Transform.Right;
                     }
+                    
+                    //Rotation
                     if (window.GetKey(Keys.E))
                     {
-                        shape.Transform.Rotation += new Vector(-movementSpeed*fixedDeltaTime, 0f);
+                        var rotation = shape.Transform.Rotation;
+                        rotation.z -= (2*MathF.PI * fixedDeltaTime)/3;
+                        shape.Transform.Rotation = rotation;
                     }
                     if (window.GetKey(Keys.Q))
                     {
-                        shape.Transform.Rotation += new Vector(movementSpeed*fixedDeltaTime, 0f);
+                        var rotation = shape.Transform.Rotation;
+                        rotation.z += (2*MathF.PI * fixedDeltaTime)/3;
+                        shape.Transform.Rotation = rotation;
                     }
 
                     walkDirection = walkDirection.Normalize();
